@@ -1,7 +1,6 @@
 import sqlite3 as sql
 import pandas as pd
 from sklearn import neighbors
-from ipywidgets import interact ## para análisis interactivo
 import numpy as np
 
 conn=sql.connect('db_movies')

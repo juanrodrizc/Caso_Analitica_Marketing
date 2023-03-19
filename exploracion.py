@@ -11,7 +11,7 @@ import numpy as np
 os.getcwd()
 #os.chdir('C:/Users/Asus/Documents/Analitica 3 Caso Marketing')
 
-i=Image.open('Diseño de la solución.png','r') # imagen en color 
+i=Image.open('diseño_solución.png','r') # imagen en color 
 i.show()
 
 ###### para ejecutar sql y conectarse a bd ###
@@ -68,7 +68,7 @@ rating_users=pd.read_sql(''' select userId,
 
 # Graficar histograma de frecuencia de numero de calificaciones por usuario
 plt.hist(rating_users, bins=15)
-plt.title('Hist frecuencia de numero de calificaciones por usuario')
+plt.title('Hist frecuencia de número de calificaciones por usuario')
 plt.xlabel('Calificaciones')
 plt.ylabel('Usuarios')
 plt.show() #La mayoría de usuarios decidieron no calificar las películas. 
@@ -90,7 +90,7 @@ rating_users2.describe()
 
 ### graficar distribucion despues de filtrar datos
 plt.hist(rating_users2, bins=15)
-plt.title('Hist frecuencia de numero de calificaciones por usuario')
+plt.title('Hist frecuencia de número de calificaciones por usuario')
 plt.xlabel('Calificaciones')
 plt.ylabel('Usuarios')
 plt.show() #La minoría de usuarios ha calificado 
@@ -108,7 +108,7 @@ rating_movies.describe()
 
 ### graficar distribucion
 plt.hist(rating_movies, bins=15)
-plt.title('Hist frecuencia de numero de calificaciones por película')
+plt.title('Hist frecuencia de número de calificaciones por película')
 plt.xlabel('Calificaciones')
 plt.ylabel('Películas')
 plt.show()
@@ -126,7 +126,7 @@ rating_movies2.describe()
 
 ### graficar distribucion despues de filtrar datos
 plt.hist(rating_movies2, bins=15)
-plt.title('Hist frecuencia de numero de calificaciones por película')
+plt.title('Hist frecuencia de número de calificaciones por película')
 plt.xlabel('Calificaciones')
 plt.ylabel('Películas')
 plt.show() #Más de 400 peliculas no se encuentran calificadas
@@ -183,17 +183,16 @@ print('Las películas con mejor calificación son:', np.array(consulta2['title']
 
 #### Las peliculas mejor calificadas en cada año de publicación ###
 consulta3=pd.read_sql(""" with t1 as  (select year, title, 
-                      avg(rating) as avg_rat, 
-                      count(*) as view,
-                        row_number() 
-                        over (partition by year order by avg(rating) desc) as rn
-                        from full_ratings
-                        group by year, title)
-
-                      select *  from t1
-                      where rn = 1
-                      order by year desc, avg_rat desc
-            """, conn)
+                              avg(rating) as avg_rat, 
+                              count(*) as view,
+                              row_number() 
+                              over (partition by year order by avg(rating) desc) as rn
+                              from full_ratings
+                              group by year, title)
+                          select *  from t1
+                          where rn = 1
+                          order by year desc, avg_rat desc
+                          """, conn)
 
 consulta3=pd.DataFrame(data=consulta3)
 print(consulta3.iloc[:,:2])
