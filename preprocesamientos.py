@@ -8,12 +8,12 @@ import datetime
 from mlxtend.preprocessing import TransactionEncoder
 
 from PIL import Image
-i=Image.open('descarga.png','r') # imagen en color 
+i=Image.open('Diseño de la solución.png','r') # imagen en color 
 i.show()
 
 ### para ver y cambiar directorio de trabajo
 os.getcwd()
-os.chdir('C:\\Users\\ASUS\\Documents\\ANALITICA III\\Caso Marketing')
+os.chdir('C:/Users/Asus/Documents/Analitica 3 Caso Marketing')
 
 ###### para ejecutar sql y conectarse a bd ###
 conn=sql.connect('db_movies')
@@ -34,15 +34,12 @@ import re
 patron_regex = r'\((\d{4})\)'
 
 # Extraer año de cada fila en la columna 'texto'
-movies['year'] = movies['title'].apply(lambda x: re.findall(patron_regex, x)[0] if re.findall(patron_regex, x) else None).astype('Int64')
-
+movies['year'] = movies['title'].apply(lambda x: re.findall(patron_regex, x)[0] if re.findall(patron_regex, x) else None)
+null_rows = movies[movies.isna().any(axis=1)]
+movies['year'].fillna(0, inplace =True)
+movies['year'] = movies['year'].astype(int)
 # Eliminar el año de la columna 'texto'
 movies['title'] = movies['title'].apply(lambda x: re.sub(patron_regex, '', x))
-
-
-null_rows = movies[movies.isna().any(axis=1)]
-
-movies['year'].fillna(0, inplace =True)
 
 
 # Separamos los generos de las películas
@@ -60,3 +57,7 @@ del(movies["genres"])
 movies = pd.concat([movies, genres], axis = 1)
 
 movies.info()
+
+
+############################################################
+
