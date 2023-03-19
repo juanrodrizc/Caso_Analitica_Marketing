@@ -1,15 +1,11 @@
 import os 
 import sqlite3 as sql
 import pandas as pd
-import plotly.graph_objs as go 
 import matplotlib.pyplot as plt
-import plotly.express as px
-import matplotlib 
 import funciones as fn
 from PIL import Image
 import preprocesamientos as pre
 import numpy as np
-#matplotlib.use('Qt5Agg')
 
 ### para ver y cambiar directorio de trabajo
 os.getcwd()
@@ -46,7 +42,7 @@ ratings["rating"].value_counts()
 
 ##### Descripción base de ratings
 
-###calcular la distribución de ratingS
+###calcular la distribución de ratings
 dr=pd.read_sql(""" select 
                           rating, 
                           count(*) as conteo 
@@ -70,16 +66,12 @@ rating_users=pd.read_sql(''' select userId,
                          order by cnt_rat asc
                          ''',conn )
 
-#fig  = px.histogram(rating_users, x= 'cnt_rat', title= 'Hist frecuencia de numero de calificaciones por usuario')
-#fig.show() 
-
 # Graficar histograma de frecuencia de numero de calificaciones por usuario
 plt.hist(rating_users, bins=15)
 plt.title('Hist frecuencia de numero de calificaciones por usuario')
 plt.xlabel('Calificaciones')
 plt.ylabel('Usuarios')
 plt.show() #La mayoría de usuarios decidieron no calificar las películas. 
-
 
 rating_users.describe()
 #El valor máximo de películas calificadas por un usuario es demasiado grande, ya que dista en gran proporción de la media
@@ -115,7 +107,6 @@ rating_movies=pd.read_sql(''' select movieId,
 rating_movies.describe()
 
 ### graficar distribucion
-
 plt.hist(rating_movies, bins=15)
 plt.title('Hist frecuencia de numero de calificaciones por película')
 plt.xlabel('Calificaciones')
@@ -133,7 +124,6 @@ rating_movies2=pd.read_sql(''' select movieId,
 
 rating_movies2.describe()
 
-
 ### graficar distribucion despues de filtrar datos
 plt.hist(rating_movies2, bins=15)
 plt.title('Hist frecuencia de numero de calificaciones por película')
@@ -141,27 +131,30 @@ plt.xlabel('Calificaciones')
 plt.ylabel('Películas')
 plt.show() #Más de 400 peliculas no se encuentran calificadas
 
-###########
+
+########### Cargue de funciones de preprocesamiento ###########
 pre.timestamp(ratings)
 pre.split_year(movies)
 movies=pre.split__gender(movies)
 
-
+# Guardar tablas en base de datos
 movies.to_sql('movies2', conn, if_exists='replace')
 ratings.to_sql('ratings2', conn, if_exists='replace')
 
-
+### Preprocesamiento en sql
 fn.ejecutar_sql('preprocesamientos.sql', cur)
+
 full = pd.read_sql("SELECT * FROM full_ratings; ",conn)
 pre.escalar(full)
+
+# Guardar tabla escalada en base de datos
 full.to_sql('full', conn, if_exists='replace')
 
-### para verificar las tablas que hay disponibles
-cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
-print(cur.fetchall())
+### para verificar la tabla
+full.info() 
 full.duplicated().sum() #No existen duplicados
 
-##### recomendaciones basado en popularidad ######
+##### recomendaciones basadas en popularidad ######
 
 #### 10 peliculas mejores calificadas
 consulta1=pd.read_sql("""select Title, 
