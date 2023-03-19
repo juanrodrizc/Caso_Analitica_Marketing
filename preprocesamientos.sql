@@ -9,7 +9,7 @@ drop table if exists ratings_sel;
 create table ratings_sel as 
 
 select userId, count(*) as cnt_rat
-from ratings
+from ratings2
 group by userId
 having cnt_rat >=100 and cnt_rat <= 1000
 order by cnt_rat desc ;
@@ -17,13 +17,13 @@ order by cnt_rat desc ;
 
 
 ---crear tabla con películas que han sido calificadas por más de 50 usuarios
-drop table if exists peliculas_sel;
+drop table if exists movies_sel;
 
 
 
 create table movies_sel as select movieId,
                          count(*) as cnt_rat
-                         from ratings
+                         from ratings2
                          group by movieId
                          having cnt_rat >=50
                          order by cnt_rat desc ;
@@ -37,7 +37,7 @@ create table ratings_final as
 select a.userId,
 a.movieId ,
 a.rating 
-from ratings a 
+from ratings2 a 
 inner join movies_sel b
 on a.movieId =b.movieId
 inner join ratings_sel c
@@ -69,8 +69,9 @@ a."Sci-Fi" as Sci_Fi,
 a.Thriller,
 a.War,
 a.Western,
-a."(no genres listed)" as no_genres_listed,
-from movies a
+a."(no genres listed)" as no_genres_listed
+
+from movies2 a
 inner join movies_sel c
 on a.movieId= c.movieId;
 
@@ -80,9 +81,10 @@ drop table if exists full_ratings ;
 
 create table full_ratings as select 
 a.rating ,
-b.*,
+a.userId,
+b.*
  from ratings_final a inner join
- movies_final b on a.userId=b.userId;
+ movies_final b on a.movieId=b.movieId;
 
 
 
