@@ -11,6 +11,7 @@ import numpy as np
 os.getcwd()
 #os.chdir('C:/Users/Asus/Documents/Analitica 3 Caso Marketing')
 
+# Diseño de la solución
 i=Image.open('diseño_solución.png','r') # imagen en color 
 i.show()
 
@@ -20,20 +21,21 @@ cur=conn.cursor()
 
 ### para verificar las tablas que hay disponibles
 cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
-print(cur.fetchall())
+print(cur.fetchall()) # movies, ratings
 
 ############ cargar tablas ####
 movies = pd.read_sql("SELECT * FROM movies; ",conn)
 ratings = pd.read_sql("SELECT * FROM ratings; ",conn)
 
-
 ### Identificar campos de cruce y verificar que estén en mismo formato ####
 ### verificar duplicados
 
 movies.info() # Se observa que tiene 3 campos, el id de la película, el título y el género
+movies.head() # Se identifica que los años de lanzamiento de la película estaban indexados al título
 movies.duplicated().sum() #No se tienen duplicados 
 
-ratings.info()
+ratings.info() # Se observa que tiene 4 campos, userid, movieId, rating y timestamp
+ratings.head() # Se debe cambiar el formato del timestamp a fecha
 ratings.duplicated().sum() #No se tienen duplicados
 
 movies["genres"].unique() #Separar los géneros que estan indicados con |
@@ -76,7 +78,7 @@ plt.show() #La mayoría de usuarios decidieron no calificar las películas.
 rating_users.describe()
 #El valor máximo de películas calificadas por un usuario es demasiado grande, ya que dista en gran proporción de la media
 
-#### filtrar usuarios con más de 100 películas calificadas (para tener calificaion confiable) y los que tienen mas de mill porque pueden ser no razonables
+#### filtrar usuarios con más de 100 películas calificadas (para tener calificaion confiable) y los que tienen mas de mil porque pueden ser no razonables
 rating_users2=pd.read_sql(''' select userId,
                          count(*) as cnt_rat
                          from ratings
@@ -113,7 +115,7 @@ plt.xlabel('Calificaciones')
 plt.ylabel('Películas')
 plt.show()
  
-####Filtrar películas que tengan más de 50 calificaciones y usuarios que no tengan más de 10 películas calificados
+#### Filtrar películas que tengan más de 50 calificaciones
 rating_movies2=pd.read_sql(''' select movieId,
                          count(*) as cnt_rat
                          from ratings
@@ -129,7 +131,7 @@ plt.hist(rating_movies2, bins=15)
 plt.title('Hist frecuencia de número de calificaciones por película')
 plt.xlabel('Calificaciones')
 plt.ylabel('Películas')
-plt.show() #Más de 400 peliculas no se encuentran calificadas
+plt.show() # Quedan 450 películas luego del filtro
 
 
 ########### Cargue de funciones de preprocesamiento ###########
