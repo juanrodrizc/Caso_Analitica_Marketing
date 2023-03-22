@@ -78,12 +78,12 @@ plt.show() #La mayoría de usuarios decidieron no calificar las películas.
 rating_users.describe()
 #El valor máximo de películas calificadas por un usuario es demasiado grande, ya que dista en gran proporción de la media
 
-#### filtrar usuarios con más de 100 películas calificadas (para tener calificaion confiable) y los que tienen mas de mil porque pueden ser no razonables
+#### filtrar usuarios con más de 20 películas calificadas (para tener calificaion confiable) y los que tienen mas de mil porque pueden ser no razonables
 rating_users2=pd.read_sql(''' select userId,
                          count(*) as cnt_rat
                          from ratings
                          group by userId
-                         having cnt_rat >=100 and cnt_rat <=1000
+                         having cnt_rat >=20 and cnt_rat <=1200
                          order by cnt_rat asc
                          ''',conn )
 
@@ -115,12 +115,12 @@ plt.xlabel('Calificaciones')
 plt.ylabel('Películas')
 plt.show()
  
-#### Filtrar películas que tengan más de 50 calificaciones
+#### Filtrar películas que tengan más de 5 calificaciones
 rating_movies2=pd.read_sql(''' select movieId,
                          count(*) as cnt_rat
                          from ratings
                          group by movieId
-                         having cnt_rat>=50
+                         having cnt_rat>=5
                          order by cnt_rat desc
                          ''',conn )
 
@@ -132,6 +132,7 @@ plt.title('Hist frecuencia de número de calificaciones por película')
 plt.xlabel('Calificaciones')
 plt.ylabel('Películas')
 plt.show() # Quedan 450 películas luego del filtro
+
 
 
 ########### Cargue de funciones de preprocesamiento ###########
@@ -155,6 +156,35 @@ full.to_sql('full', conn, if_exists='replace')
 ### para verificar la tabla
 full.info() 
 full.duplicated().sum() #No existen duplicados
+
+####  10 películas peor calificadas
+consulta=pd.read_sql("""select Title, 
+            avg(rating) as avg_rat,
+            count(*) as view
+            from full
+            group by title
+            order by avg_rat asc
+            limit 10
+            
+            """, conn)
+        
+print('Las películas con peor calificación son:', np.array(consulta['title']))
+
+
+#### Top 3 de géneros más vistos
+
+consulta0=pd.read_sql("""select sum(Action, Adventure,
+                      Animation, Children, Comedy, Crime, Documentary, Drama,
+                      Fantasy, Film_Noir, Horror, IMAX, Musical, Mystery,
+                      Romance, Sci_Fi, Thriller, War, Western) as view
+                      from full
+                      group by Action, Adventure,
+                      Animation, Children, Comedy, Crime, Documentary, Drama,
+                      Fantasy, Film_Noir, Horror, IMAX, Musical, Mystery,
+                      Romance, Sci_Fi, Thriller, War, Western
+                      order by view desc""", conn)
+                      
+print('Las películas con mejor calificación son:', np.array(consulta0))
 
 ##### recomendaciones basadas en popularidad ######
 
@@ -198,3 +228,5 @@ consulta3=pd.read_sql(""" with t1 as  (select year, title,
 
 consulta3=pd.DataFrame(data=consulta3)
 print(consulta3.iloc[:,:2])
+
+### 

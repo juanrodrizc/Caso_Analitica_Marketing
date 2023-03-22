@@ -2,7 +2,7 @@
 ----procesamientos---
 
 
----crear tabla con usuarios con más de 100 películas calificadas y menos de 1000
+---crear tabla con usuarios con más de 20 películas calificadas y menos de 1200
 
 drop table if exists ratings_sel;
 
@@ -11,12 +11,12 @@ create table ratings_sel as
 select userId, count(*) as cnt_rat
 from ratings2
 group by userId
-having cnt_rat >=100 and cnt_rat <= 1000
+having cnt_rat >=20 and cnt_rat <= 1200
 order by cnt_rat desc ;
 
 
 
----crear tabla con películas que han sido calificadas por más de 50 usuarios
+---crear tabla con películas que han sido calificadas por más de 5 usuarios
 drop table if exists movies_sel;
 
 
@@ -25,7 +25,7 @@ create table movies_sel as select movieId,
                          count(*) as cnt_rat
                          from ratings2
                          group by movieId
-                         having cnt_rat >=50
+                         having cnt_rat >=5
                          order by cnt_rat desc ;
 
 
