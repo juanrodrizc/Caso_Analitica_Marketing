@@ -91,7 +91,7 @@ ratings=pd.read_sql('select * from ratings_final', conn)
 reader = Reader(rating_scale=(0, 5))
 
 ###las columnas deben estar en orden estándar: user item rating
-data   = Dataset.load_from_df(ratings[['user_id','movieId','rating']], reader)
+data   = Dataset.load_from_df(ratings[['userId','movieId','rating']], reader)
 
 
 
@@ -122,3 +122,44 @@ gridsearchKNNWithMeans.fit(data)
 
 gridsearchKNNWithMeans.best_params["rmse"]
 gridsearchKNNWithMeans.best_score["rmse"]
+gs_model=gridsearchKNNWithMeans.best_estimator['rmse'] ### mejor estimador de gridsearch
+
+
+################# Realizar predicciones
+
+trainset = data.build_full_trainset() ### esta función convierte todos los datos en entrenamiento
+model=gs_model.fit(trainset) ## se entrena sobre todos los datos posibles
+
+
+predset = trainset.build_anti_testset() ### crea una tabla con todos los usuarios y las películas que no han visto
+#### en la columna de rating pone el promedio de todos los rating, en caso de que no pueda calcularlo para un item-usuario
+
+predictions = model.test(predset) ### función muy pesada, hace las predicciones de rating para todos las películas que no ha visto un usuario
+### la funcion test recibe un test set constriuido con build_test method, o el que genera crosvalidate
+
+predictions_df = pd.DataFrame(predictions) ### esta tabla se puede llevar a una base donde estarán todas las predicciones
+predictions_df.shape
+predictions_df.head()
+predictions_df['r_ui'].unique() ### promedio de ratings
+predictions_df.sort_values(by='est',ascending=False)
+
+####### la predicción se puede hacer para una película puntual
+model.predict(uid='171', iid='213',r_ui='3.568656')
+
+##### funcion para recomendar las 10 películas con mejores predicciones y llevar base de datos para consultar resto de información
+def recomendaciones(user_id,n_recomend=10):
+    
+    predictions_userID = predictions_df[predictions_df['uid'] == user_id].\
+                    sort_values(by="est", ascending = False).head(n_recomend)
+
+    recomendados = predictions_userID[['iid','est']]
+    recomendados.to_sql('reco',conn,if_exists="replace")
+    
+    recomendados=pd.read_sql('''select a.*, b.title 
+                             from reco a left join movies2 b
+                             on a.iid=b.movieId ''', conn)
+
+    return(recomendados)
+
+ 
+us1=recomendaciones(user_id=171,n_recomend=20)
