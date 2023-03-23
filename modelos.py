@@ -2,6 +2,11 @@ import sqlite3 as sql
 import pandas as pd
 from sklearn import neighbors
 import numpy as np
+from surprise import Reader, Dataset
+from surprise import KNNBasic, KNNWithMeans, KNNWithZScore, KNNBaseline, SVD
+from surprise.model_selection import cross_validate, GridSearchCV
+from surprise.model_selection import train_test_split
+import preprocesamientos as pre
 
 conn=sql.connect('db_movies')
 cur=conn.cursor()
@@ -12,7 +17,8 @@ cur.fetchall()
 
 movies2 = pd.read_sql("SELECT * FROM movies2; ",conn)
 
-dummies = movies2.iloc[:,4:] #Tabla de datos solo con dummies 
+dummies = movies2.iloc[:,3:] #Tabla de datos dummies y el año
+pre.escalar(dummies)
 
 """--- Sistema de recomendación basado en contenido KNN un solo producto visto ---"""
 
@@ -75,3 +81,44 @@ for i in usuario['userId']:
 tabla_recom_user=pd.DataFrame(data=usuario['userId'])
 tabla_recom_user['recomendaciones con movieId']=recom_user
 print(tabla_recom_user)
+
+""" Sistema de recomendación filtro colaborativo basado en usuario """
+
+
+ratings=pd.read_sql('select * from ratings_final', conn)
+
+###### leer datos desde tabla de pandas
+reader = Reader(rating_scale=(0, 5))
+
+###las columnas deben estar en orden estándar: user item rating
+data   = Dataset.load_from_df(ratings[['user_id','movieId','rating']], reader)
+
+
+
+models=[KNNBasic(),KNNWithMeans(),KNNWithZScore(),KNNBaseline()] 
+results = {}
+
+for model in models:
+ 
+    CV_scores = cross_validate(model, data, measures=["MAE","RMSE"], cv=5, n_jobs=-1)  
+    result = pd.DataFrame.from_dict(CV_scores).mean(axis=0).\
+             rename({'test_mae':'MAE', 'test_rmse': 'RMSE'})
+    results[str(model).split("algorithms.")[1].split("object ")[0]] = result
+
+
+performance_df = pd.DataFrame.from_dict(results).T
+performance_df.sort_values(by='RMSE')
+
+
+param_grid = { 'sim_options' : {'name': ['msd','cosine'], \
+                                'min_support': [5], \
+                                'user_based': [False, True]}
+             }
+
+gridsearchKNNWithMeans = GridSearchCV(KNNWithMeans, param_grid, measures=['rmse'], \
+                                      cv=2, n_jobs=2)
+                                    
+gridsearchKNNWithMeans.fit(data)
+
+gridsearchKNNWithMeans.best_params["rmse"]
+gridsearchKNNWithMeans.best_score["rmse"]
