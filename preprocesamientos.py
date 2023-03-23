@@ -1,6 +1,4 @@
 
-import os 
-import sqlite3 as sql
 import pandas as pd
 import datetime
 import re
@@ -8,18 +6,6 @@ import re
 # !pip install mlxtend
 from mlxtend.preprocessing import TransactionEncoder
 from sklearn.preprocessing import MinMaxScaler
-
-### para ver y cambiar directorio de trabajo
-os.getcwd()
-#os.chdir('C:/Users/Asus/Documents/Analitica 3 Caso Marketing') --> Cambiar Ruta de archivos
-
-###### para ejecutar sql y conectarse a bd ###
-conn=sql.connect('db_movies')
-cur=conn.cursor()
-
-############ cargar tablas ####
-movies = pd.read_sql("SELECT * FROM movies; ",conn)
-ratings = pd.read_sql("SELECT * FROM ratings; ",conn)
 
 # dado que la fecha esta en formato timestamp, lo que implica que esta dada en segundos, por ello lo llevamos a formato fecha
 def timestamp(ratings): 

@@ -36,7 +36,8 @@ drop table if exists ratings_final;
 create table ratings_final as
 select a.userId,
 a.movieId ,
-a.rating 
+a.rating,
+a.timestamp 
 from ratings2 a 
 inner join movies_sel b
 on a.movieId =b.movieId
@@ -82,6 +83,7 @@ drop table if exists full_ratings ;
 create table full_ratings as select 
 a.rating ,
 a.userId,
+a.timestamp,
 b.*
  from ratings_final a inner join
  movies_final b on a.movieId=b.movieId;

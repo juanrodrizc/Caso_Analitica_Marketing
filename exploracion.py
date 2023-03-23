@@ -133,8 +133,6 @@ plt.xlabel('Calificaciones')
 plt.ylabel('Películas')
 plt.show() # Quedan 450 películas luego del filtro
 
-
-
 ########### Cargue de funciones de preprocesamiento ###########
 pre.timestamp(ratings)
 pre.split_year(movies)
@@ -171,24 +169,76 @@ consulta=pd.read_sql("""select Title,
 print('Las películas con peor calificación son:', np.array(consulta['title']))
 
 
-#### Top 3 de géneros más vistos
+#### Cantidad de vistas por género
 
-consulta0=pd.read_sql("""select sum(Action, Adventure,
-                      Animation, Children, Comedy, Crime, Documentary, Drama,
-                      Fantasy, Film_Noir, Horror, IMAX, Musical, Mystery,
-                      Romance, Sci_Fi, Thriller, War, Western) as view
-                      from full
-                      group by Action, Adventure,
-                      Animation, Children, Comedy, Crime, Documentary, Drama,
-                      Fantasy, Film_Noir, Horror, IMAX, Musical, Mystery,
-                      Romance, Sci_Fi, Thriller, War, Western
-                      order by view desc""", conn)
-                      
-print('Las películas con mejor calificación son:', np.array(consulta0))
+sumgen = pd.read_sql("""select 
+                        sum(Action) as Action,
+                        sum(Adventure) as Adventure,
+                        sum(Animation) as Animation, 
+                        sum(Children) as Children, 
+                        sum(Comedy) as Comedy, 
+                        sum(Crime) as Crime, 
+                        sum(Documentary) as Documentary, 
+                        sum(Drama) as Drama,
+                        sum(Fantasy) as Fantasy, 
+                        sum(Film_Noir) as Film_Noir, 
+                        sum(Horror) as Horror, 
+                        sum(IMAX) as IMAX, 
+                        sum(Musical) as Musical, 
+                        sum(Mystery) as Mystery,
+                        sum(Romance) as Romance, 
+                        sum(Sci_Fi) as Sci_Fi, 
+                        sum(Thriller) as Thriller, 
+                        sum(War) as War, 
+                        sum(Western) as Western,
+                        sum(no_genres_listed) as no_genres_listed
+                    from full; """, conn)
+                    
+sumgen = sumgen.T.reset_index().rename(columns={'index': 'genero', 0: 'num_peliculas'}).sort_values(by='num_peliculas', ascending=False)
+ 
+# Crear la gráfica de barras
+plt.bar(sumgen['genero'], sumgen['num_peliculas'])
+plt.title('Número de visualizaciones por género')
+plt.xlabel('Género')
+plt.ylabel('Visualizaciones')
+plt.xticks(rotation=60)
+plt.show()
 
-##### recomendaciones basadas en popularidad ######
+# Rating promedio a lo largo del tiempo
+serie = pd.read_sql("""select strftime('%Y', timestamp) as year, avg(rating) as avg_rating 
+                    from ratings2 
+                    group by year 
+                    order by year asc
+                """, conn)
 
-#### 10 peliculas mejores calificadas
+# Crear la gráfica de serie de tiempo
+plt.plot(serie['year'], serie['avg_rating'])
+plt.title('Rating promedio a lo largo del tiempo')
+plt.xlabel('Fecha')
+plt.ylabel('Rating promedio')
+plt.xticks(rotation=60)
+plt.show() 
+
+
+# Visualizaciones a lo largo del tiempo
+serie = pd.read_sql("""select strftime('%Y', timestamp) as year, count(*) as views 
+                    from full 
+                    group by year 
+                    order by year asc
+                """, conn)
+
+# Crear la gráfica de serie de tiempo
+plt.plot(serie['year'], serie['views'])
+plt.title('Visualizaciones a lo largo del tiempo')
+plt.xlabel('Fecha')
+plt.ylabel('Visualizaciones')
+plt.xticks(rotation=60)
+plt.show()              
+     
+              
+##### Recomendaciones Basadas en Popularidad ######
+
+#### 10 peliculas mejores calificadas ###
 consulta1=pd.read_sql("""select Title, 
             avg(rating) as avg_rat,
             count(*) as view
@@ -228,5 +278,3 @@ consulta3=pd.read_sql(""" with t1 as  (select year, title,
 
 consulta3=pd.DataFrame(data=consulta3)
 print(consulta3.iloc[:,:2])
-
-### 
