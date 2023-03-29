@@ -110,19 +110,21 @@ performance_df = pd.DataFrame.from_dict(results).T
 performance_df.sort_values(by='RMSE')
 
 
-param_grid = { 'sim_options' : {'name': ['msd','cosine'], \
+param_grid = { 'k':[40,80,60],
+              'min':[30,40],
+              'sim_options' : {'name': ['msd','cosine'], \
                                 'min_support': [5], \
                                 'user_based': [False, True]}
              }
 
-gridsearchKNNWithMeans = GridSearchCV(KNNWithMeans, param_grid, measures=['rmse'], \
+gridsearchKNNBaseline = GridSearchCV(KNNBaseline, param_grid, measures=['rmse'], \
                                       cv=2, n_jobs=2)
                                     
-gridsearchKNNWithMeans.fit(data)
+gridsearchKNNBaseline.fit(data)
 
-gridsearchKNNWithMeans.best_params["rmse"]
-gridsearchKNNWithMeans.best_score["rmse"]
-gs_model=gridsearchKNNWithMeans.best_estimator['rmse'] ### mejor estimador de gridsearch
+gridsearchKNNBaseline.best_params["rmse"]
+gridsearchKNNBaseline.best_score["rmse"]
+gs_model=gridsearchKNNBaseline.best_estimator['rmse'] ### mejor estimador de gridsearch
 
 
 ################# Realizar predicciones
