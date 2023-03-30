@@ -1,4 +1,4 @@
-# Caso_Analitica_Marketing
+# Caso Analítica Marketing
 
 Modelos de recomendación de películas para plataforma de streaming: popularidad, contenido y filtros colaborativos.
 
