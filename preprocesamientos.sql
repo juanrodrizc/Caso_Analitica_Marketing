@@ -29,7 +29,7 @@ create table movies_sel as select movieId,
                          order by cnt_rat desc ;
 
 
--------crear tablas filtradas de libros, usuarios y calificaciones ----
+-------crear tablas filtradas de películas y calificaciones ----
 
 drop table if exists ratings_final;
 

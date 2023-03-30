@@ -78,7 +78,7 @@ plt.show() #La mayoría de usuarios decidieron no calificar las películas.
 rating_users.describe()
 #El valor máximo de películas calificadas por un usuario es demasiado grande, ya que dista en gran proporción de la media
 
-#### filtrar usuarios con más de 20 películas calificadas (para tener calificaion confiable) y los que tienen mas de mil porque pueden ser no razonables
+#### filtrar usuarios con más de 20 películas calificadas (para tener calificaion confiable) y los que tienen mas de 1200 porque pueden ser no razonables
 rating_users2=pd.read_sql(''' select userId,
                          count(*) as cnt_rat
                          from ratings

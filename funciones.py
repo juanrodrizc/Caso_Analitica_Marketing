@@ -1,4 +1,4 @@
-
+# Para cargar y ejecutar el preprocesamiento de SQL 
 def ejecutar_sql (nombre_archivo, cur):
     sql_file=open(nombre_archivo)
     sql_as_string=sql_file.read()

@@ -42,7 +42,5 @@ def escalar(movies):
     movies[["year"]]=sc.fit_transform(movies[['year']])
     return movies
 
-#Quitarles el espacio a los nombres 
-#Poner el The de primero
 
 

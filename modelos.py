@@ -2,10 +2,10 @@ import sqlite3 as sql
 import pandas as pd
 from sklearn import neighbors
 import numpy as np
+#conda install -c conda-forge scikit-surprise
 from surprise import Reader, Dataset
-from surprise import KNNBasic, KNNWithMeans, KNNWithZScore, KNNBaseline, SVD
+from surprise import KNNBasic, KNNWithMeans, KNNWithZScore, KNNBaseline
 from surprise.model_selection import cross_validate, GridSearchCV
-from surprise.model_selection import train_test_split
 import preprocesamientos as pre
 
 conn=sql.connect('db_movies')
@@ -90,10 +90,9 @@ ratings=pd.read_sql('select * from ratings_final', conn)
 ###### leer datos desde tabla de pandas
 reader = Reader(rating_scale=(0, 5))
 
+
 ###las columnas deben estar en orden estándar: user item rating
 data   = Dataset.load_from_df(ratings[['userId','movieId','rating']], reader)
-
-
 
 models=[KNNBasic(),KNNWithMeans(),KNNWithZScore(),KNNBaseline()] 
 results = {}
@@ -109,7 +108,7 @@ for model in models:
 performance_df = pd.DataFrame.from_dict(results).T
 performance_df.sort_values(by='RMSE')
 
-
+# Cuadricula de hiperparámetros
 param_grid = { 'k':[40,80,60],
               'min':[30,40],
               'sim_options' : {'name': ['msd','cosine'], \
@@ -127,7 +126,7 @@ gridsearchKNNBaseline.best_score["rmse"]
 gs_model=gridsearchKNNBaseline.best_estimator['rmse'] ### mejor estimador de gridsearch
 
 
-################# Realizar predicciones
+################# Realizar predicciones #################
 
 trainset = data.build_full_trainset() ### esta función convierte todos los datos en entrenamiento
 model=gs_model.fit(trainset) ## se entrena sobre todos los datos posibles
@@ -136,7 +135,7 @@ model=gs_model.fit(trainset) ## se entrena sobre todos los datos posibles
 predset = trainset.build_anti_testset() ### crea una tabla con todos los usuarios y las películas que no han visto
 #### en la columna de rating pone el promedio de todos los rating, en caso de que no pueda calcularlo para un item-usuario
 
-predictions = model.test(predset) ### función muy pesada, hace las predicciones de rating para todos las películas que no ha visto un usuario
+predictions = model.test(predset) 
 ### la funcion test recibe un test set constriuido con build_test method, o el que genera crosvalidate
 
 predictions_df = pd.DataFrame(predictions) ### esta tabla se puede llevar a una base donde estarán todas las predicciones
@@ -145,7 +144,7 @@ predictions_df.head()
 predictions_df['r_ui'].unique() ### promedio de ratings
 predictions_df.sort_values(by='est',ascending=False)
 
-####### la predicción se puede hacer para una película puntual
+####### Predicción para una película puntual
 model.predict(uid='171', iid='213',r_ui='3.568656')
 
 ##### funcion para recomendar las 10 películas con mejores predicciones y llevar base de datos para consultar resto de información
@@ -163,5 +162,5 @@ def recomendaciones(user_id,n_recomend=10):
 
     return(recomendados)
 
- 
+# Recomendaciones para el usuario de ID 171
 us1=recomendaciones(user_id=171,n_recomend=20)
