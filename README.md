@@ -1,4 +1,6 @@
-# Caso_Analitica_Marketing
+# Caso_Analitica_Marketin
+
+Modelos de recomendación de películas para plataforma de streaming: popularidad, contenido y filtros colaborativos.
 
 - Descripción de la situación y las bases de datos "Descripción_Situación_BD.pdf"
 - Base de datos "db_movies"
